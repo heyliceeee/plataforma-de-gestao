@@ -4,12 +4,12 @@ import axios from 'axios';
 export default {
     data() {
         return {
-            city: "Porto",  // Cidade inicial
+            city: localStorage.getItem("lastCity") || "Portugal",  // Carrega a última cidade pesquisada ou usa "Portugal"
             units: "metric",
             apiKey: "3b50c973dfc5621bd70c86847a95fb25",
             weather: {
-                cityName: "Porto",
-                country: "PT",
+                cityName: "--",
+                country: "--",
                 temp: "--",
                 wind: "--",
                 humidity: "--",
@@ -35,6 +35,9 @@ export default {
                 this.weather.wind = response.data.wind.speed;
                 this.weather.humidity = response.data.main.humidity;
                 this.weather.condition = response.data.weather[0].description;
+
+                localStorage.setItem("lastCity", this.city); // guarda a cidade no LocalStorage
+
             } catch (error) {
                 console.error("Error fetching climate data:", error);
                 alert("City not found! Try another one.");
