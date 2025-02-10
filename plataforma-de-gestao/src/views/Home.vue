@@ -9,7 +9,7 @@ export default {
             apiKey: "3b50c973dfc5621bd70c86847a95fb25",
             weather: {
                 cityName: "Porto",
-                country: "Portugal",
+                country: "PT",
                 temp: "--",
                 wind: "--",
                 humidity: "--",
@@ -36,8 +36,8 @@ export default {
                 this.weather.humidity = response.data.main.humidity;
                 this.weather.condition = response.data.weather[0].description;
             } catch (error) {
-                console.error("Erro ao buscar dados climáticos:", error);
-                alert("Cidade não encontrada! Tente outra.");
+                console.error("Error fetching climate data:", error);
+                alert("City not found! Try another one.");
             }
         }
     }
@@ -49,10 +49,15 @@ export default {
 
         <!-- search -->
         <div class="row mt-4">
-
+            <div class="d-flex" role="search">
+                <input class="form-control me-2" v-model="city" @keyup.enter="fetchWeather" type="search"
+                    placeholder="🔍 Type the city and press Enter" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit" @click="fetchWeather">Search</button>
+            </div>
         </div>
 
-        <p class="fs-2">🌤️ {{ weather.cityName }}, {{ weather.country }}</p>
+        <!-- selected city -->
+        <p class="fs-2 mt-3">🌤️ {{ weather.cityName }}, {{ weather.country }}</p>
 
         <div class="row mt-4">
             <!-- Cartões (Mobile-First) -->
