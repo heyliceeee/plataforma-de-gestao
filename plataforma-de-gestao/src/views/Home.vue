@@ -1,84 +1,96 @@
-<template>
-    <div class="container mt-4">
-        <p class="fs-2">📊 Dashboard - Gestao de DPP</p>
-
-        <!-- Cards com estatísticas -->
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="fs-5 card-title">Total de DPPs</p>
-                        <p class="fs-3">{{ totalDPPs }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="fs-5 card-title">Total de DPPs</p>
-                        <p class="fs-3">{{ totalDPPs }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="fs-5 card-title">Total de DPPs</p>
-                        <p class="fs-3">{{ totalDPPs }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Gráfico de Status dos DPPs -->
-        <div class="mt-4">
-            <h4>Status dos DPPs</h4>
-            <canvas id="dppChart"></canvas>
-        </div>
-
-
-        <!-- Tabela com Últimos DPPs Criados -->
-
-    </div>
-</template>
-
-
 <script>
-import Chart from 'chart.js/auto';
+import axios from 'axios';
 
 export default {
     data() {
         return {
-            totalDPPs: 120,  // Número total de DPPs
-            dppsCriadosMes: 15,  // Criados este mês
-            dppsExpirados: 5,  // Expirados
-            ultimosDPPs: [
-                { id: 101, nome: "Produto A", status: "Ativo", dataCriacao: "10/02/2025" },
-                { id: 102, nome: "Produto B", status: "Expirado", dataCriacao: "08/02/2025" },
-                { id: 103, nome: "Produto C", status: "Pendente", dataCriacao: "07/02/2025" }
-            ]
+            city: "Porto",  // Cidade inicial
+            units: "metric",
+            apiKey: "3b50c973dfc5621bd70c86847a95fb25",
+            weather: {
+                cityName: "Porto",
+                country: "Portugal",
+                temp: "--",
+                wind: "--",
+                humidity: "--",
+                condition: "--"
+            }
         };
     },
     mounted() {
-        this.renderChart();
+        this.fetchWeather();
     },
     methods: {
-        renderChart() {
-            const ctx = document.getElementById('dppChart');
-            new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Ativo', 'Expirado', 'Pendente'],
-                    datasets: [{
-                        data: [100, 10, 10],  // Simulando números para cada status
-                        backgroundColor: ['#28a745', '#dc3545', '#ffc107']
-                    }]
-                }
-            });
+        async fetchWeather() {
+            if (!this.city) return; // Evita pesquisas vazias
+
+            try {
+                const response = await axios.get(
+                    `https://api.openweathermap.org/data/2.5/weather?q=${this.city}&appid=${this.apiKey}&units=${this.units}`
+                );
+
+                this.weather.cityName = response.data.name;
+                this.weather.country = response.data.sys.country;
+                this.weather.temp = response.data.main.temp;
+                this.weather.wind = response.data.wind.speed;
+                this.weather.humidity = response.data.main.humidity;
+                this.weather.condition = response.data.weather[0].description;
+            } catch (error) {
+                console.error("Erro ao buscar dados climáticos:", error);
+                alert("Cidade não encontrada! Tente outra.");
+            }
         }
     }
 };
 </script>
+
+<template>
+    <div class="container mt-4">
+
+        <!-- search -->
+        <div class="row mt-4">
+
+        </div>
+
+        <p class="fs-2">🌤️ {{ weather.cityName }}, {{ weather.country }}</p>
+
+        <div class="row mt-4">
+            <!-- Cartões (Mobile-First) -->
+            <div class="col-12 col-md-6 col-lg-3 mb-3">
+                <div class="card p-3 text-center">
+                    <div class="card-body">
+                        <p class="fs-5 card-title">🌡️ Temperature</p>
+                        <p class="fs-3">{{ weather.temp }}°C</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-3 mb-3">
+                <div class="card p-3 text-center">
+                    <div class="card-body">
+                        <p class="fs-5 card-title">💨 Wind</p>
+                        <p class="fs-3">{{ weather.wind }}km/h</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-3 mb-3">
+                <div class="card p-3 text-center">
+                    <div class="card-body">
+                        <p class="fs-5 card-title">💧 Humidity</p>
+                        <p class="fs-3">{{ weather.humidity }}%</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-3 mb-3">
+                <div class="card p-3 text-center">
+                    <div class="card-body">
+                        <p class="fs-5 card-title">☁️ Condition</p>
+                        <p class="fs-3">{{ weather.condition }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

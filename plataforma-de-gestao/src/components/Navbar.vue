@@ -1,7 +1,7 @@
 <template>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-            <a class="navbar-brand" to="/">DPP</a>
+            <a class="navbar-brand" to="/">🌎 Weather Dashboard</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                 aria-label="Toggle navigation">
@@ -13,13 +13,10 @@
                         <router-link class="nav-link" to="/">🏠 Home</router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link class="nav-link" to="/users">👤 Users</router-link>
+                        <router-link class="nav-link" to="/history">🕒 History</router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link class="nav-link" to="/products">📦 Products</router-link>
-                    </li>
-                    <li class="nav-item">
-                        <router-link class="nav-link" to="/reports">📊 Reports</router-link>
+                        <router-link class="nav-link" to="/settings">⚙️ Settings</router-link>
                     </li>
                     <li class="nav-item">
                         <router-link class="nav-link btn btn-outline-light" to="/login">🔑 Login</router-link>
