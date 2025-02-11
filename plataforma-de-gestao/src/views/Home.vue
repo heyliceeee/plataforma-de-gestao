@@ -48,6 +48,16 @@ export default {
 
                 localStorage.setItem("lastCity", this.city); // guarda a cidade no LocalStorage
 
+                // Salvar no histórico (evitar duplicatas)
+                let history = JSON.parse(localStorage.getItem("cityHistory")) || [];
+
+                if (!history.includes(this.city)) {
+                    history.unshift(this.city); // Adiciona no início do array
+                    
+                    if (history.length > 5) history.pop(); // Mantém apenas as últimas 5 cidades
+                    localStorage.setItem("cityHistory", JSON.stringify(history));
+                }
+
                 // Buscar previsão de 5 dias
                 this.fetchForecast();
 
@@ -178,11 +188,13 @@ export default {
                 </div>
 
                 <!-- Controles do Carrossel -->
-                <button class="carousel-control-prev" type="button" data-bs-target="#carousel-forecast" data-bs-slide="prev">
+                <button class="carousel-control-prev carousel-control-custom" type="button" data-bs-target="#carousel-forecast" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Previous</span>
                 </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#carousel-forecast" data-bs-slide="next">
+                <button class="carousel-control-next carousel-control-custom
+                
+                " type="button" data-bs-target="#carousel-forecast" data-bs-slide="next">
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Next</span>
                 </button>
@@ -200,5 +212,26 @@ export default {
 .weather-icon-5days {
     width: 35px;
     height: 35px;
+}
+
+/* Personalização dos botões do carrossel */
+.carousel-control-custom {
+    background-color: rgba(248, 249, 250, 0.5); /* Cinza com transparência */
+    border-radius: 5px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Alinhar verticalmente ao centro */
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Garante que os ícones internos fiquem visíveis */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    filter: invert(1); /* Inverte a cor para manter os ícones visíveis */
 }
 </style>
