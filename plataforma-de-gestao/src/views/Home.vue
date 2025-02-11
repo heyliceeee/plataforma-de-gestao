@@ -13,12 +13,20 @@ export default {
                 temp: "--",
                 wind: "--",
                 humidity: "--",
-                condition: "--"
-            }
+                condition: "--",
+                icon: "",
+                iconUrl: ""
+            },
+            forecast: [], // Lista original para armazenar a previsão dos próximos 5 dias
+            groupedForecast: [] // Lista processada para o carrossel
         };
     },
     mounted() {
         this.fetchWeather();
+        window.addEventListener("resize", this.updateGrouping);
+    },
+    beforeUnmount() {
+        window.removeEventListener("resize", this.updateGrouping);
     },
     methods: {
         async fetchWeather() {
@@ -35,12 +43,50 @@ export default {
                 this.weather.wind = response.data.wind.speed;
                 this.weather.humidity = response.data.main.humidity;
                 this.weather.condition = response.data.weather[0].description;
+                this.weather.icon = response.data.weather[0].icon;
+                this.weather.iconUrl = `https://openweathermap.org/img/wn/${this.weather.icon}@2x.png`;
 
                 localStorage.setItem("lastCity", this.city); // guarda a cidade no LocalStorage
+
+                // Buscar previsão de 5 dias
+                this.fetchForecast();
 
             } catch (error) {
                 console.error("Error fetching climate data:", error);
                 alert("City not found! Try another one.");
+            }
+        },
+
+        async fetchForecast() {
+            try {
+                const response = await axios.get(
+                    `https://api.openweathermap.org/data/2.5/forecast?q=${this.city}&appid=${this.apiKey}&units=${this.units}`
+                );
+
+                // Filtrar dados para pegar 1 previsão por dia (12:00 UTC)
+                const filteredData = response.data.list.filter(item => item.dt_txt.includes("12:00:00"));
+
+                // Transformar os dados em um formato mais limpo
+                this.forecast = filteredData.map(item => ({
+                    date: new Date(item.dt_txt).toLocaleDateString("en", { weekday: "short", day: "numeric", month: "short" }),
+                    temp: item.main.temp,
+                    description: item.weather[0].description,
+                    iconUrl: `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`
+                }));
+
+                this.updateGrouping(); // Atualiza a exibição conforme a tela
+
+            } catch (error) {
+                console.error("Erro ao buscar previsão do tempo:", error);
+            }
+        },
+
+        updateGrouping() {
+            let cardsPerSlide = window.innerWidth < 768 ? 1 : window.innerWidth < 992 ? 2 : 4;
+            this.groupedForecast = [];
+
+            for (let i = 0; i < this.forecast.length; i += cardsPerSlide) {
+                this.groupedForecast.push(this.forecast.slice(i, i + cardsPerSlide));
             }
         }
     }
@@ -62,8 +108,8 @@ export default {
         <!-- selected city -->
         <p class="fs-2 mt-3">🌤️ {{ weather.cityName }}, {{ weather.country }}</p>
 
+        <!-- Cards -->
         <div class="row mt-4">
-            <!-- Cartões (Mobile-First) -->
             <div class="col-12 col-md-6 col-lg-3 mb-3">
                 <div class="card p-3 text-center">
                     <div class="card-body">
@@ -91,14 +137,68 @@ export default {
                 </div>
             </div>
 
-            <div class="col-12 col-md-6 col-lg-3 mb-3">
+           <!-- Cartão atualizado com o ícone dinâmico do clima -->
+           <div class="col-12 col-md-6 col-lg-3 mb-3">
                 <div class="card p-3 text-center">
                     <div class="card-body">
                         <p class="fs-5 card-title">☁️ Condition</p>
-                        <p class="fs-3">{{ weather.condition }}</p>
+
+                        <div class="d-flex align-items-center justify-content-center">
+                            <img v-if="weather.icon" :src="weather.iconUrl" :alt="weather.condition" class="weather-icon">
+                            <p class="fs-3">{{ weather.condition }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+
+        <!-- Previsao para os proximos 5 dias -->
+        <div class="container mt-4">
+            <p class="fs-3 mt-4 text-center">📅 Forecast for the next 5 days</p>
+
+            <!-- Carrossel de Previsão do Tempo -->
+            <div class="carousel slide" id="carousel-forecast" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <div v-for="(group, index) in groupedForecast" :key="index" class="carousel-item" :class="{ active: index === 0 }">
+                        <div class="row mt-4">
+                            <div v-for="(day, idx) in group" :key="idx" class="col-12 col-md-6 col-lg-3 mb-3">
+                                <div class="card text-center p-3">
+                                    <p class="fs-5 card-title">{{ day.date }}</p>
+                                    <p class="fs-3">{{ day.temp }}°C</p>
+
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <img :src="day.iconUrl" :alt="day.description" class="weather-icon-5days">
+                                        <p class="text-muted fs-5">{{ day.description }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controles do Carrossel -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#carousel-forecast" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carousel-forecast" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
     </div>
 </template>
+
+<style scoped>
+.weather-icon {
+    width: 40px;
+    height: 40px;
+}
+
+.weather-icon-5days {
+    width: 35px;
+    height: 35px;
+}
+</style>
