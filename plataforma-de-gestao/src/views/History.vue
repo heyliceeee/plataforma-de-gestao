@@ -22,12 +22,12 @@ export default {
 
 <template>
     <div class="container mt-4">
-        <h2>📜 Search History</h2>
+        <p class="fs-2">📜 Search History</p>
 
         <ul class="list-group mt-3">
             <li v-for="(city, index) in history" :key="index" class="list-group-item d-flex justify-content-between align-items-center">
                 <span @click="selectCity(city)" class="city-name">{{ city }}</span>
-                <button class="btn btn-sm btn-primary" @click="selectCity(city)">🔄 See Weather</button>
+                <button class="btn btn-sm btn-primary" @click="selectCity(city)">👁️ See Weather</button>
             </li>
         </ul>
 

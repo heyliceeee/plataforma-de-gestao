@@ -48,6 +48,11 @@ export default {
 
                 localStorage.setItem("lastCity", this.city); // guarda a cidade no LocalStorage
 
+                 // Contador de buscas por cidade
+                let searches = JSON.parse(localStorage.getItem("citySearchCount")) || {};
+                searches[this.city] = (searches[this.city] || 0) + 1;
+                localStorage.setItem("citySearchCount", JSON.stringify(searches));
+
                 // Salvar no histórico (evitar duplicatas)
                 let history = JSON.parse(localStorage.getItem("cityHistory")) || [];
 
